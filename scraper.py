@@ -1,5 +1,6 @@
 import requests
 import json
+from datetime import datetime, timedelta
 
 cookies = {
     'renderCtx': '%7B%22pageId%22%3A%223e01151f-cdd6-4058-af41-906813477461%22%2C%22schema%22%3A%22Published%22%2C%22viewType%22%3A%22Published%22%2C%22brandingSetId%22%3A%22457e5b18-486f-4d74-97c2-cc6e6662c03a%22%2C%22audienceIds%22%3A%226AuUN0000001lD2%2C6AuUN0000001lD1%2C6AuUN0000002FMN%22%7D',
@@ -53,10 +54,20 @@ def format_events(response):
     events = []
 
     for event in actions_data:
+
+        start_date = datetime.strptime(event['Start_Date__c'], '%Y-%m-%d').date()
+        end_date = datetime.strptime(event['End_Date__c'], '%Y-%m-%d').date()
+
+
+        if start_date != end_date:
+            print(end_date)
+            end_date = end_date + timedelta(days=1)
+            print(end_date)
+
         events.append({
             'title': event['Activity_Name__c'],
-            'start_date': event['Start_Date__c'],
-            'end_date': event['End_Date__c'],
+            'start_date': start_date,
+            'end_date': end_date,
             'url': 'https://activities.outdoors.org/s/oc-activity/' + event['Id'],
             'description': event['Description__c'].replace('\n', ' ')
         })
