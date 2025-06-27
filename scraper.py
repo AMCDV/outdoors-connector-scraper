@@ -55,7 +55,8 @@ def format_events(response):
     for event in actions_data:
         events.append({
             'title': event['Activity_Name__c'],
-            'date': event['Start_Date__c'],
+            'start_date': event['Start_Date__c'],
+            'end_date': event['End_Date__c'],
             'url': 'https://activities.outdoors.org/s/oc-activity/' + event['Id'],
             'description': event['Description__c'].replace('\n', ' ')
         })
