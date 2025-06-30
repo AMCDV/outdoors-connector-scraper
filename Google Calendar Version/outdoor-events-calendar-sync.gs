@@ -17,6 +17,7 @@
  * - Duplicate prevention: Verifies against existing calendar events
  * - Automatic cleanup: Removes cancelled events from calendar
  * - Email notifications: Daily summaries of changes (if any)
+ * - Event URLs: Placed in location field for easy access
  * 
  * =============================================================================
  */
@@ -433,8 +434,8 @@ function processEventChanges(changes) {
         event.startDate,
         event.endDate,
         {
-          description: `${event.description}\n\nMore info: ${event.url}`,
-          location: event.location
+          description: event.description,
+          location: event.url // URL in location field
         }
       );
       Logger.log(`➕ Added: ${event.title}`);
@@ -455,8 +456,8 @@ function processEventChanges(changes) {
       if (existingEvents.length > 0) {
         const existingEvent = existingEvents[0];
         existingEvent.setTitle(event.title);
-        existingEvent.setDescription(`${event.description}\n\nMore info: ${event.url}`);
-        existingEvent.setLocation(event.location);
+        existingEvent.setDescription(event.description);
+        existingEvent.setLocation(event.url); // URL in location field
         
         Logger.log(`✏️ Updated: ${event.title}`);
         results.modified++;
