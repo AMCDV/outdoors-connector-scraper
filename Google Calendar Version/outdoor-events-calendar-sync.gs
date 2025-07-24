@@ -53,7 +53,7 @@ function setupDailySync() {
     .nearMinute(randomMinute)
     .create();
     
-  Logger.log(`✅ Daily sync enabled for 12:${randomMinute.toString().padStart(2, '0')} AM every day`);
+  Logger.log(`[SUCCESS] Daily sync enabled for 12:${randomMinute.toString().padStart(2, '0')} AM every day`);
   
   // Send confirmation email
   GmailApp.sendEmail(
@@ -75,7 +75,7 @@ function setupDailySync() {
  */
 function dailySyncOutdoorEvents() {
   try {
-    Logger.log('🔄 Starting daily sync of outdoor events...');
+    Logger.log('[SYNC] Starting daily sync of outdoor events...');
     
     // Fetch current events from API
     const apiEvents = getOutdoorEvents();
@@ -86,7 +86,7 @@ function dailySyncOutdoorEvents() {
     
     // Initialize tracking if this is the first run
     if (Object.keys(tracking).length === 0) {
-      Logger.log('⚠️ No tracking data found - initializing from existing calendar events...');
+      Logger.log('[WARNING] No tracking data found - initializing from existing calendar events...');
       initializeTrackingFromCalendar();
     }
     
@@ -108,10 +108,10 @@ function dailySyncOutdoorEvents() {
     // Send email summary
     sendDailySyncSummary(results);
     
-    Logger.log('✅ Daily sync completed successfully');
+    Logger.log('[SUCCESS] Daily sync completed successfully');
     
   } catch (error) {
-    Logger.log(`❌ Daily sync failed: ${error.toString()}`);
+    Logger.log(`[ERROR] Daily sync failed: ${error.toString()}`);
     
     // Send error notification
     GmailApp.sendEmail(
@@ -268,7 +268,7 @@ function initializeTrackingFromCalendar() {
   const properties = PropertiesService.getScriptProperties();
   properties.setProperty('outdoorEventsTracking', JSON.stringify(tracking));
   
-  Logger.log(`📊 Initialized tracking for ${matchedEvents} existing events`);
+  Logger.log(`[STATS] Initialized tracking for ${matchedEvents} existing events`);
   return { matchedEvents, totalTracked: Object.keys(tracking).length };
 }
 
@@ -287,7 +287,7 @@ function getEventTrackingData() {
   try {
     return JSON.parse(trackingData);
   } catch (error) {
-    Logger.log(`⚠️ Error parsing tracking data: ${error.toString()}`);
+    Logger.log(`[WARNING] Error parsing tracking data: ${error.toString()}`);
     return {};
   }
 }
@@ -367,7 +367,7 @@ function analyzeEventChanges(apiEvents, tracking) {
     }
   }
   
-  Logger.log(`📈 Changes: ${changes.new.length} new, ${changes.modified.length} modified, ${changes.removed.length} removed`);
+  Logger.log(`[ANALYSIS] Changes: ${changes.new.length} new, ${changes.modified.length} modified, ${changes.removed.length} removed`);
   return changes;
 }
 
@@ -438,10 +438,10 @@ function processEventChanges(changes) {
           location: event.url // URL in location field
         }
       );
-      Logger.log(`➕ Added: ${event.title}`);
+      Logger.log(`[ADD] Added: ${event.title}`);
       results.newAdded++;
     } catch (error) {
-      Logger.log(`❌ Error adding ${event.title}: ${error.toString()}`);
+      Logger.log(`[ERROR] Error adding ${event.title}: ${error.toString()}`);
       results.errors.push(`Add ${event.title}: ${error.toString()}`);
     }
   }
@@ -459,11 +459,11 @@ function processEventChanges(changes) {
         existingEvent.setDescription(event.description);
         existingEvent.setLocation(event.url); // URL in location field
         
-        Logger.log(`✏️ Updated: ${event.title}`);
+        Logger.log(`[UPDATE] Updated: ${event.title}`);
         results.modified++;
       }
     } catch (error) {
-      Logger.log(`❌ Error updating ${event.title}: ${error.toString()}`);
+      Logger.log(`[ERROR] Error updating ${event.title}: ${error.toString()}`);
       results.errors.push(`Update ${event.title}: ${error.toString()}`);
     }
   }
@@ -480,12 +480,12 @@ function processEventChanges(changes) {
       for (const existingEvent of existingEvents) {
         if (existingEvent.getTitle() === removedEvent.title) {
           existingEvent.deleteEvent();
-          Logger.log(`🗑️ Removed: ${removedEvent.title}`);
+          Logger.log(`[REMOVE] Removed: ${removedEvent.title}`);
           results.removed++;
         }
       }
     } catch (error) {
-      Logger.log(`❌ Error removing ${removedEvent.title}: ${error.toString()}`);
+      Logger.log(`[ERROR] Error removing ${removedEvent.title}: ${error.toString()}`);
       results.errors.push(`Remove ${removedEvent.title}: ${error.toString()}`);
     }
   }
@@ -542,15 +542,15 @@ function sendDailySyncSummary(results) {
   // Detailed summary for changes or errors
   let summary = `Daily Outdoor Events Sync Summary\n`;
   summary += `Time: ${new Date().toLocaleString()}\n\n`;
-  summary += `📊 CHANGES PROCESSED:\n`;
-  summary += `   ➕ New events added: ${results.newAdded}\n`;
-  summary += `   ✏️ Events updated: ${results.modified}\n`;
-  summary += `   🗑️ Cancelled events removed: ${results.removed}\n\n`;
+  summary += `CHANGES PROCESSED:\n`;
+  summary += `   + New events added: ${results.newAdded}\n`;
+  summary += `   * Events updated: ${results.modified}\n`;
+  summary += `   - Cancelled events removed: ${results.removed}\n\n`;
   
   if (results.errors.length > 0) {
-    summary += `❌ ERRORS (${results.errors.length}):\n`;
+    summary += `ERRORS (${results.errors.length}):\n`;
     for (const error of results.errors) {
-      summary += `   • ${error}\n`;
+      summary += `   * ${error}\n`;
     }
     summary += `\n`;
   }
@@ -580,7 +580,7 @@ function sendDailySyncSummary(results) {
 function clearTrackingData() {
   const properties = PropertiesService.getScriptProperties();
   properties.deleteProperty('outdoorEventsTracking');
-  Logger.log('🗑️ Cleared all tracking data - next sync will treat all events as new');
+  Logger.log('[CLEAR] Cleared all tracking data - next sync will treat all events as new');
   
   GmailApp.sendEmail(
     Session.getActiveUser().getEmail(),
@@ -603,7 +603,7 @@ function disableDailySync() {
     }
   }
   
-  Logger.log(`🛑 Disabled daily sync - removed ${removedCount} triggers`);
+  Logger.log(`[STOP] Disabled daily sync - removed ${removedCount} triggers`);
   
   GmailApp.sendEmail(
     Session.getActiveUser().getEmail(),
